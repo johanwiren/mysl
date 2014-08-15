@@ -1,44 +1,71 @@
-#!/usr/bin/env python
+# vim: set fileencoding=utf8 :
 
 import json
+import os
 import pickle
 import requests
 
 APIROOT = 'https://sl.se/api/MySL'
-USERNAME = 'johan@johanwiren.se'
-PASSWORD = '123qweASD'
+COOKIE_FILE = "%s/.mysl.cookies" % os.environ['HOME']
 
-class SlClient:
+class MySLAPIException(Exception):
 
-    def __init__(self):
+    def __init__(self, data):
+        self.data = data
+
+    def __str__(self):
+        return repr(self.data['ResultErrors'])
+
+
+class Messages(object):
+
+    NOT_LOGGED_IN = u'Du har blivit utloggad. Den här tjänsten kräver inloggad användare'
+
+class MySL(object):
+
+    def __getattr__(self, name):
+        def handlerFunction(*args, **kwargs):
+            if kwargs:
+                return self._make_request(name, kwargs)
+            return self._make_request(name)
+        return handlerFunction
+
+    def __init__(self, username=None, password=None, cookiejar=False):
+        self.username = username
+        self.password = password
         self.cookies = ''
-        try:
-            with open('cookies', 'r') as file:
-                self.cookies = pickle.load(file)
-        except:
-            pass
+        self.cookiejar = cookiejar 
+        if self.cookiejar:
+            try:
+                with open(COOKIE_FILE, 'r') as file:
+                    self.cookies = pickle.load(file)
+            except:
+                pass
 
-    def get(self, resource):
-        r = requests.get("%s/%s" % (APIROOT, resource), cookies=self.cookies)
-        if r.json()['status'] == 'error':
-            self.login()
-            r = requests.get("%s/%s" % (APIROOT, resource), cookies=self.cookies)
-        return r.json()['data']
+    def _make_request(self, resource, args=None):
+        if args:
+            headers = {'content-type': 'application/json'}
+            response = requests.post("%s/%s" % (APIROOT, resource),
+                    cookies=self.cookies,
+                    data=json.dumps(args),
+                    headers=headers).json()
+        else:
+            response = requests.get("%s/%s" % (APIROOT, resource), cookies=self.cookies).json()
+        if response['status'] == 'error':
+            if response['data']['ResultErrors'][0] == Messages.NOT_LOGGED_IN:
+                self._login()
+                return self._make_request(resource, args)
+            else:
+                raise MySLAPIException(response['data'])
+        return response['data']
 
-    def login(self):
+    def _login(self):
         headers = {'content-type': 'application/json'}
-        payload = {'username': USERNAME, 'password': PASSWORD}
+        payload = {'username': self.username, 'password': self.password}
         p = requests.post("%s/Authenticate" % APIROOT,
                 data=json.dumps(payload),
                 headers=headers)
         self.cookies = p.cookies
-        with open('cookies', 'w') as file:
-            pickle.dump(self.cookies, file)
-        
-
-client = SlClient()
-cards = client.get('GetTravelCards')['travel_card_list']
-for card in cards:
-    print "%s %d" % (card['travel_card']['name'],
-            card['travel_card']['detail']['purse_value'])
-
+        if self.cookiejar:
+            with open(COOKIE_FILE, 'w') as file:
+                pickle.dump(self.cookies, file)
