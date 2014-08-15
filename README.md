@@ -23,5 +23,5 @@ api.GetTravelCards()
 Fetch travel-card details
 
 ```python
-api.GetTravelCardDetail(reference='travel_card/XXXXXXX')
+api.GetTravelCardDetails(reference='travel_card/XXXXXXX')
 ```
