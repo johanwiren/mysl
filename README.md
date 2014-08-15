@@ -13,11 +13,15 @@ Usage
 
 Fetch travel-cards
 
-    import mysl
+```python
+import mysl
 
-    api = mysl.MySL(username='my_user_name', password='my_secret_password')
-    api.GetTravelCards()
+api = mysl.MySL(username='my_user_name', password='my_secret_password')
+api.GetTravelCards()
+```
 
 Fetch travel-card details
 
-    api.GetTravelCardDetail(reference='travel_card/XXXXXXX')
+```python
+api.GetTravelCardDetail(reference='travel_card/XXXXXXX')
+```
