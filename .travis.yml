@@ -1,15 +1,15 @@
 language: python
 python:
-    - "2.7"
-install: "pip install requests"
+- '2.7'
+install: pip install requests
 deploy:
   provider: s3
   access_key_id: AKIAIUJWXAA6UNQXBQNA
   secret_access_key:
-    secure: HaGDnEkNDryDKrXs00WX6oKNos1FIh8affcPeMDfNCpJIrXydJ/uDyB0JCjQkhgaGQI51aspnSOBOZMYIOMYGyJ99AVpxt6SprcAdO3wpHhSRQbNUznxXWBvPm6qEC0TLuOeYqkFFpOT49Oc3ezfeQFvTh9n77RSIhDn/CSHrhc=
+    secure: Am+GVzGDH5HdYu+eiP8UcaX1e4qw0jn8CTcBNtszAp7aNDyihm/Xtl2bCZufgZlGcQHH0EolZVMl3ROqFLE3RHffvOGMmxYtbwaDHi1z0xOi2ZuvhQ/A0kp4tlOAio0VhVaowLgwq6uU2JBy3jgPiRtaMJUf9Ll6XCWuR7IoYTw=
   bucket: s3.johanwiren.se
   region: eu-west-1
   skip_cleanup: true
   local-dir: dist
   upload-dir: packages/johanwiren/mysl
-script: "python setup.py sdist"
+script: python setup.py sdist
