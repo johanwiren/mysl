@@ -4,9 +4,9 @@ python:
 install: pip install requests
 deploy:
   provider: s3
-  access_key_id: AKIAIUJWXAA6UNQXBQNA
+  access_key_id: AKIAJFMAQS24LL3P7HAQ
   secret_access_key:
-    secure: Am+GVzGDH5HdYu+eiP8UcaX1e4qw0jn8CTcBNtszAp7aNDyihm/Xtl2bCZufgZlGcQHH0EolZVMl3ROqFLE3RHffvOGMmxYtbwaDHi1z0xOi2ZuvhQ/A0kp4tlOAio0VhVaowLgwq6uU2JBy3jgPiRtaMJUf9Ll6XCWuR7IoYTw=
+    secure: YZi2CX1pZCxOfodt8wUlpWAv72CGh6AISxbW5BNWjjU+BEl4sKhpkrMKjfL96SbFZTqizi/hL44b9oNEy4XB9svK/cVRAI2UcLEUm9K06N/7nN/800lPbBaIfGv8M7dBrWzeQ9nNaHpNyjf6tynkMYxeurGhAe0MkQ/uvH83Crg=
   bucket: s3.johanwiren.se
   region: eu-west-1
   endpoint: s3.johanwiren.se.s3-website-eu-west-1.amazonaws.com
