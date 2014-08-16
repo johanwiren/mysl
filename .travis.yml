@@ -10,6 +10,6 @@ deploy:
   bucket: s3.johanwiren.se
   region: eu-west-1
   skip_cleanup: true
-  local-dir: sdist
+  local-dir: dist
   upload-dir: packages/johanwiren/mysl
 script: "python setup.py sdist"
