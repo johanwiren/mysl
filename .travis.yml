@@ -8,6 +8,7 @@ deploy:
   secret_access_key:
     secure: HaGDnEkNDryDKrXs00WX6oKNos1FIh8affcPeMDfNCpJIrXydJ/uDyB0JCjQkhgaGQI51aspnSOBOZMYIOMYGyJ99AVpxt6SprcAdO3wpHhSRQbNUznxXWBvPm6qEC0TLuOeYqkFFpOT49Oc3ezfeQFvTh9n77RSIhDn/CSHrhc=
   bucket: s3.johanwiren.se
+  region: eu-west-1
   skip_cleanup: true
   upload-dir: sdist
 script: "python setup.py sdist"
