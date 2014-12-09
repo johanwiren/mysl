@@ -30,10 +30,10 @@ class MySL(object):
             return self._make_request(name)
         return handlerFunction
 
-    def __init__(self, username=None, password=None, cookiejar=False):
+    def __init__(self, username=None, password=None, cookiejar=False, debug=False):
         self.username = username
         self.password = password
-        self.cookies = ''
+        self.cookies = requests.cookies.RequestsCookieJar()
         self.cookiejar = cookiejar 
         if self.cookiejar:
             try:
@@ -43,29 +43,48 @@ class MySL(object):
                 pass
 
     def _make_request(self, resource, args=None):
+        headers = dict()
+        headers['Accept'] = 'application/json, text/plain, */*'
+        headers['User-Agent'] = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:30.0) Gecko/20100101 Firefox/30.0'
+        headers['Referer'] = 'https://sl.se/sv/mitt-konto/konto/'
+        request_args = dict(cookies=self.cookies)
         if args:
-            headers = {'content-type': 'application/json'}
-            response = requests.post("%s/%s" % (APIROOT, resource),
-                    cookies=self.cookies,
-                    data=json.dumps(args),
-                    headers=headers).json()
+            headers['Content-Type'] = 'application/json;charset=utf-8'
+            request = "%s/%s" % (APIROOT, resource)
+            request_args['data'] = json.dumps(args)
+            request_args['headers'] = headers
+            response = requests.post(request, **request_args)
+            response_json = response.json()
+            self.cookies.update(response.cookies)
         else:
-            response = requests.get("%s/%s" % (APIROOT, resource), cookies=self.cookies).json()
-        if response['status'] == 'error':
-            if response['data']['ResultErrors'][0] == Messages.NOT_LOGGED_IN:
+            request = "%s/%s" % (APIROOT, resource)
+            request_args = dict(
+                    cookies=self.cookies,
+                    headers=headers)
+            response = requests.get(request, **request_args)
+            self.cookies.update(response.cookies)
+            response_json = response.json()
+        if response_json['status'] == 'error':
+            if unicode(response_json['data']['ResultErrors'][0]) == Messages.NOT_LOGGED_IN:
                 self._login()
                 return self._make_request(resource, args)
             else:
-                raise MySLAPIException(response['data'])
-        return response['data']
+                raise MySLAPIException(response_json['data'])
+        return response_json['data']
 
     def _login(self):
-        headers = {'content-type': 'application/json'}
+        r = requests.get('https://sl.se/sv/mitt-sl/inloggning',
+                cookies=self.cookies)
+        self.cookies.update(r.cookies)
+        headers = {'content-type': 'application/json; charset=utf-8'}
+        headers['User-Agent'] = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:30.0) Gecko/20100101 Firefox/30.0'
+        headers['Referer'] = 'https://sl.se/sv/mitt-sl/inloggning/'
         payload = {'username': self.username, 'password': self.password}
         p = requests.post("%s/Authenticate" % APIROOT,
                 data=json.dumps(payload),
-                headers=headers)
-        self.cookies = p.cookies
+                headers=headers,
+                cookies=self.cookies)
+        self.cookies.update(p.cookies)
         if self.cookiejar:
             with open(COOKIE_FILE, 'w') as file:
                 pickle.dump(self.cookies, file)
